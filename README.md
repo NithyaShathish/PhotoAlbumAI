@@ -14,7 +14,7 @@ The photo album is a web application that can be searched using natural language
 The photo album is a scalable web application designed and deployed using AWS services like S3, Lex and ElasticSearch. CI/CD DevOps pipeline is used to automate the build, test and deploy phases. The application allows users to make search requests, display the search results resulting from the query as well as upload new photos. The user is also given a choice to use either voice or text to perform the search queries.
 
 
-![Chatbot Demo](https://github.com/siddharthchd/Voice_Controlled_Photo_Album_WebApp/blob/main/FrontEnd/FrontEndUI.png)
+![Chatbot Demo](./App/Web-Page.png)
 <br>
 
 ## Technologies
@@ -46,4 +46,4 @@ The photo album is a scalable web application designed and deployed using AWS se
 * Amazon Lex bot is created to handle search queries for which an intent called 'SearchIntent' is created and training utterances are added to the intent.
 
 The following is the architecture for this project, to understand the workflow:-
-![Chatbot Architecture](https://github.com/siddharthchd/Voice_Controlled_Photo_Album_WebApp/blob/main/Architecture/diagram.png)
+![Chatbot Architecture](./Architecture/diagram.png)
