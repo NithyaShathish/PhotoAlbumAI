@@ -21,8 +21,7 @@ Resources:
     DeletionPolicy: Retain
     Properties:
       StageName: "v1"
-      RestApiId: "isb5sib0p4"
-      CacheClusterEnabled: false
+      CacheClusterEnabled: falsex
       MethodSettings: 
       - 
         CacheDataEncrypted: false
