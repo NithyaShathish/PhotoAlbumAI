@@ -1,0 +1,293 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "APIGateway for the AI based Photo Search"
+Resources:
+  ApiGatewayRestApi:
+    Type: "AWS::ApiGateway::RestApi"
+    DeletionPolicy: Retain
+    Properties:
+      Name: "AI Photo Search"
+      Description: "AI Photo Search application, built during the Cloud course at NYU"
+      ApiKeySourceType: "HEADER"
+      BinaryMediaTypes: 
+      - "image/jpg"
+      - "image/jpeg"
+      - "image/png"
+      EndpointConfiguration: 
+        Types: 
+        - "REGIONAL"
+
+  ApiGatewayStage:
+    Type: "AWS::ApiGateway::Stage"
+    DeletionPolicy: Retain
+    Properties:
+      StageName: "v1"
+      RestApiId: "isb5sib0p4"
+      CacheClusterEnabled: false
+      MethodSettings: 
+      - 
+        CacheDataEncrypted: false
+        CacheTtlInSeconds: 300
+        CachingEnabled: false
+        DataTraceEnabled: true
+        HttpMethod: "*"
+        LoggingLevel: "ERROR"
+        MetricsEnabled: false
+        ResourcePath: "/*"
+        ThrottlingBurstLimit: 5000
+        ThrottlingRateLimit: 10000
+      TracingEnabled: false
+
+  ApiGatewayResourceUpload:
+    Type: "AWS::ApiGateway::Resource"
+    DeletionPolicy: Retain
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      PathPart: "upload"
+      ParentId: !GetAtt ApiGatewayRestApi.RootResourceId
+
+  ApiGatewayResourceUploadBucket:
+    Type: "AWS::ApiGateway::Resource"
+    DeletionPolicy: Retain
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      PathPart: "{bucket}"
+      ParentId: !Ref ApiGatewayResourceUpload
+  
+  ApiGatewayResourceUploadObj:
+    Type: "AWS::ApiGateway::Resource"
+    DeletionPolicy: Retain
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      PathPart: "{object}"
+      ParentId: !Ref ApiGatewayResourceUploadBucket
+
+  ApiGatewayResourceSearch:
+    Type: "AWS::ApiGateway::Resource"
+    DeletionPolicy: Retain
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      PathPart: "search"
+      ParentId: !GetAtt ApiGatewayRestApi.RootResourceId
+
+  ApiGatewayMethodUploadPUT:
+    Type: "AWS::ApiGateway::Method"
+    DeletionPolicy: Retain
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      ResourceId: !Ref ApiGatewayResourceUploadObj
+      HttpMethod: "PUT"
+      AuthorizationType: "NONE"
+      ApiKeyRequired: false
+      OperationName: "uploadPhoto"
+      RequestParameters: 
+        "method.request.header.Content-Type": false
+        "method.request.header.x-amz-meta-customlabels": false
+        "method.request.path.bucket": true
+        "method.request.path.object": true
+      MethodResponses: 
+      - 
+        ResponseParameters: 
+          "method.response.header.Access-Control-Allow-Origin": false
+        StatusCode: "200"
+      - 
+        StatusCode: "403"
+      - 
+        StatusCode: "500"
+      Integration: 
+        CacheNamespace: !Ref ApiGatewayResourceUploadObj
+        ContentHandling: "CONVERT_TO_BINARY"
+        Credentials: !Sub "arn:aws:iam::${AWS::AccountId}:role/ApiGateway-s3-role"
+        IntegrationHttpMethod: "PUT"
+        IntegrationResponses: 
+        - 
+          ResponseParameters: 
+            "method.response.header.Access-Control-Allow-Origin": "'*'"
+          ResponseTemplates: {}
+          StatusCode: "200"
+        PassthroughBehavior: "WHEN_NO_MATCH"
+        RequestParameters: 
+          "integration.request.header.Content-Type": "method.request.header.Content-Type"
+          "integration.request.header.x-amz-meta-customlabels": "method.request.header.x-amz-meta-customlabels"
+          "integration.request.path.bucket": "method.request.path.bucket"
+          "integration.request.path.key": "method.request.path.object"
+        TimeoutInMillis: 29000
+        Type: "AWS"
+        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:s3:path/{bucket}/{key}"
+
+  ApiGatewayMethodUploadOPTIONS:
+    Type: "AWS::ApiGateway::Method"
+    DeletionPolicy: Retain
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      ResourceId: !Ref ApiGatewayResourceUploadObj
+      HttpMethod: "OPTIONS"
+      AuthorizationType: "NONE"
+      ApiKeyRequired: false
+      RequestParameters: 
+        "method.request.path.bucket": true
+        "method.request.path.object": true
+      MethodResponses: 
+      - 
+        ResponseParameters: 
+          "method.response.header.Access-Control-Allow-Headers": false
+          "method.response.header.Access-Control-Allow-Methods": false
+          "method.response.header.Access-Control-Allow-Origin": false
+        StatusCode: "200"
+      Integration: 
+        CacheNamespace: !Ref ApiGatewayResourceUploadObj
+        IntegrationResponses: 
+        - 
+          ResponseParameters: 
+            "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+            "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,PUT'"
+            "method.response.header.Access-Control-Allow-Origin": "'*'"
+          ResponseTemplates: {}
+          StatusCode: "200"
+        PassthroughBehavior: "WHEN_NO_MATCH"
+        RequestTemplates: 
+          "application/json": "{\"statusCode\": 200}"
+        TimeoutInMillis: 29000
+        Type: "MOCK"
+
+  ApiGatewayMethodSearchGET:
+    Type: "AWS::ApiGateway::Method"
+    DeletionPolicy: Retain
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      ResourceId: !Ref ApiGatewayResourceSearch
+      HttpMethod: "GET"
+      AuthorizationType: "NONE"
+      ApiKeyRequired: false
+      OperationName: "searchPhotos"
+      RequestParameters: 
+        "method.request.querystring.q": true
+      MethodResponses: 
+      - 
+        ResponseModels: 
+          "application/json": !Ref ApiGatewayModelSearchResponse
+        ResponseParameters: 
+          "method.response.header.Access-Control-Allow-Origin": false
+        StatusCode: "200"
+      - 
+        ResponseModels: 
+          "application/json": !Ref ApiGatewayModelError
+        StatusCode: "403"
+      - 
+        ResponseModels: 
+          "application/json": !Ref ApiGatewayModelError
+        StatusCode: "500"
+      Integration: 
+        CacheNamespace: !Ref ApiGatewayResourceSearch
+        ContentHandling: "CONVERT_TO_TEXT"
+        IntegrationHttpMethod: "POST"
+        IntegrationResponses: 
+        - 
+          ResponseTemplates: {}
+          StatusCode: "200"
+        PassthroughBehavior: "WHEN_NO_MATCH"
+        TimeoutInMillis: 29000
+        Type: "AWS_PROXY"
+        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:search-photo/invocations"
+
+  ApiGatewayMethodSearchOPTIONS:
+    Type: "AWS::ApiGateway::Method"
+    DeletionPolicy: Retain
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      ResourceId: !Ref ApiGatewayResourceSearch
+      HttpMethod: "OPTIONS"
+      AuthorizationType: "NONE"
+      ApiKeyRequired: false
+      MethodResponses: 
+      - 
+        ResponseParameters: 
+          "method.response.header.Access-Control-Allow-Headers": false
+          "method.response.header.Access-Control-Allow-Methods": false
+          "method.response.header.Access-Control-Allow-Origin": false
+        StatusCode: "200"
+      - 
+        ResponseParameters: 
+          "method.response.header.Access-Control-Allow-Headers": false
+          "method.response.header.Access-Control-Allow-Methods": false
+          "method.response.header.Access-Control-Allow-Origin": false
+        StatusCode: "500"
+      Integration: 
+        CacheNamespace: !Ref ApiGatewayResourceSearch
+        IntegrationResponses: 
+        - 
+          ResponseParameters: 
+            "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+            "method.response.header.Access-Control-Allow-Methods": "'GET,OPTIONS'"
+            "method.response.header.Access-Control-Allow-Origin": "'*'"
+          ResponseTemplates: {}
+          StatusCode: "200"
+        PassthroughBehavior: "WHEN_NO_MATCH"
+        RequestTemplates: 
+          "application/json": "{\"statusCode\": 200}"
+        TimeoutInMillis: 29000
+        Type: "MOCK"
+
+  ApiGatewayModelError:
+    Type: "AWS::ApiGateway::Model"
+    DeletionPolicy: Retain
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      Name: "Error"
+      Schema: |
+          {
+            "type" : "object",
+            "properties" : {
+              "code" : {
+                "type" : "integer",
+                "format" : "int32"
+              },
+              "message" : {
+                "type" : "string"
+              }
+            }
+          }
+      ContentType: "application/json"
+
+  ApiGatewayModelSearchResponse:
+    Type: "AWS::ApiGateway::Model"
+    DeletionPolicy: Retain
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      Name: "SearchResponse"
+      Schema: !Sub |
+          {
+            "type" : "object",
+            "properties" : {
+              "results" : {
+                "type" : "array",
+                "items" : {
+                  "$ref":"https://apigateway.amazonaws.com/restapis/${ApiGatewayRestApi}/models/${ApiGatewayModelPhoto}"
+                }
+              }
+            }
+          }
+      ContentType: "application/json"
+  
+  ApiGatewayModelPhoto:
+    Type: "AWS::ApiGateway::Model"
+    DeletionPolicy: Retain
+    Properties:
+      RestApiId: "isb5sib0p4"
+      Name: "Photo"
+      Schema: |
+          {
+            "type" : "object",
+            "properties" : {
+              "url" : {
+                "type" : "string"
+              },
+              "labels" : {
+                "type" : "array",
+                "items" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+      ContentType: "application/json"
+

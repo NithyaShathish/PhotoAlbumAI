@@ -1,0 +1,109 @@
+[
+    {
+        "ResourceType": "AWS::ApiGateway::Resource",
+        "LogicalResourceId": "ApiGatewayResourceSearch",
+        "ResourceIdentifier": {
+            "RestApiId": "isb5sib0p4",
+            "ResourceId": "uqo4th"
+        }
+    },
+    {
+        "ResourceType": "AWS::ApiGateway::Resource",
+        "LogicalResourceId": "ApiGatewayResourceUpload",
+        "ResourceIdentifier": {
+            "RestApiId": "isb5sib0p4",
+            "ResourceId": "o66ghl"
+        }
+    },
+    {
+        "ResourceType": "AWS::ApiGateway::Resource",
+        "LogicalResourceId": "ApiGatewayResourceUploadBucket",
+        "ResourceIdentifier": {
+            "RestApiId": "isb5sib0p4",
+            "ResourceId": "nc2xmi"
+        }
+    },
+    {
+        "ResourceType": "AWS::ApiGateway::Resource",
+        "LogicalResourceId": "ApiGatewayResourceUploadObj",
+        "ResourceIdentifier": {
+            "RestApiId": "isb5sib0p4",
+            "ResourceId": "qnyq16"
+        }
+    },
+    {
+        "ResourceType": "AWS::ApiGateway::Model",
+        "LogicalResourceId": "ApiGatewayModelPhoto",
+        "ResourceIdentifier": {
+            "RestApiId": "isb5sib0p4",
+            "Name": "Photo"
+        }
+    },
+    {
+        "ResourceType": "AWS::ApiGateway::Model",
+        "LogicalResourceId": "ApiGatewayModelError",
+        "ResourceIdentifier": {
+            "RestApiId": "isb5sib0p4",
+            "Name": "Error"
+        }
+    },
+    {
+        "ResourceType": "AWS::ApiGateway::Model",
+        "LogicalResourceId": "ApiGatewayModelSearchResponse",
+        "ResourceIdentifier": {
+            "RestApiId": "isb5sib0p4",
+            "Name": "SearchResponse"
+        }
+    },
+    {
+        "ResourceType": "AWS::ApiGateway::Method",
+        "LogicalResourceId": "ApiGatewayMethodSearchOPTIONS",
+        "ResourceIdentifier": {
+            "RestApiId": "isb5sib0p4",
+            "ResourceId": "uqo4th",
+            "HttpMethod": "OPTIONS"
+        }
+    },
+    {
+        "ResourceType": "AWS::ApiGateway::Method",
+        "LogicalResourceId": "ApiGatewayMethodSearchGET",
+        "ResourceIdentifier": {
+            "RestApiId": "isb5sib0p4",
+            "ResourceId": "uqo4th",
+            "HttpMethod": "GET"
+        }
+    },
+    {
+        "ResourceType": "AWS::ApiGateway::Method",
+        "LogicalResourceId": "ApiGatewayMethodUploadPUT",
+        "ResourceIdentifier": {
+            "RestApiId": "isb5sib0p4",
+            "ResourceId": "qnyq16",
+            "HttpMethod": "PUT"
+        }
+    },
+    {
+        "ResourceType": "AWS::ApiGateway::Method",
+        "LogicalResourceId": "ApiGatewayMethodUploadOPTIONS",
+        "ResourceIdentifier": {
+            "RestApiId": "isb5sib0p4",
+            "ResourceId": "qnyq16",
+            "HttpMethod": "OPTIONS"
+        }
+    },
+    {
+        "ResourceType": "AWS::ApiGateway::Stage",
+        "LogicalResourceId": "ApiGatewayStage",
+        "ResourceIdentifier": {
+            "RestApiId": "isb5sib0p4",
+            "StageName": "v1"
+        }
+    },
+    {
+        "ResourceType": "AWS::ApiGateway::RestApi",
+        "LogicalResourceId": "ApiGatewayRestApi",
+        "ResourceIdentifier": {
+            "RestApiId": "isb5sib0p4"
+        }
+    }
+]

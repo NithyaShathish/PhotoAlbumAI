@@ -1,0 +1,57 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Lambda Functions for Search photos and INdex photos"
+Resources:
+  IAMRole:
+    Type: "AWS::IAM::Role"
+    DeletionPolicy: Retain
+    Properties:
+      Path: "/service-role/"
+      RoleName: !Sub "${LambdaFunction2}-role-a32nuckm"
+      AssumeRolePolicyDocument: "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"lambda.amazonaws.com\"},\"Action\":\"sts:AssumeRole\"}]}"
+      MaxSessionDuration: 3600
+      ManagedPolicyArns: 
+      - "arn:aws:iam::aws:policy/AmazonS3FullAccess"
+      - "arn:aws:iam::aws:policy/AmazonRekognitionFullAccess"
+      - "arn:aws:iam::aws:policy/AdministratorAccess"
+      - "arn:aws:iam::aws:policy/AmazonLexFullAccess"
+      - !Sub "arn:aws:iam::${AWS::AccountId}:policy/service-role/AWSLambdaBasicExecutionRole-b9bfb7be-0b88-4d36-ba6f-1b0c0bea367f"
+
+  LambdaFunction:
+    Type: "AWS::Lambda::Function"
+    DeletionPolicy: Retain
+    Properties:
+      Description: "Lambda Function to search photos"
+      FunctionName: "search-photo"
+      Handler: "lambda_function.lambda_handler"
+      Architectures: 
+      - "x86_64"
+      Code: 
+        S3Bucket: "prod-04-2014-tasks"
+        S3Key: !Sub "/snapshots/${AWS::AccountId}/search-photo-d520d4f6-1144-4ff6-8af1-fb12ed70ced3"
+        S3ObjectVersion: "q9Zdez2BCd32m6WK0pxZw4GYksgteOmu"
+      MemorySize: 128
+      Role: !GetAtt IAMRole.Arn
+      Runtime: "python3.9"
+      Timeout: 900
+      TracingConfig: 
+        Mode: "PassThrough"
+
+  LambdaFunction2:
+    Type: "AWS::Lambda::Function"
+    DeletionPolicy: Retain
+    Properties:
+      Description: "Lambda Function to Index Photos"
+      FunctionName: "index-photos"
+      Handler: "lambda_function.lambda_handler"
+      Architectures: 
+      - "x86_64"
+      Code: 
+        S3Bucket: "prod-04-2014-tasks"
+        S3Key: !Sub "/snapshots/${AWS::AccountId}/index-photos-293aa7ae-e525-42ef-be6f-28fb3a17786c"
+        S3ObjectVersion: "D6nmUzwuvCnNiZIhLAzyRKCq2NoZqeiG"
+      MemorySize: 128
+      Role: !Sub "arn:aws:iam::${AWS::AccountId}:role/service-role/index-photos-role-a32nuckm"
+      Runtime: "python3.9"
+      Timeout: 900
+      TracingConfig: 
+        Mode: "PassThrough"

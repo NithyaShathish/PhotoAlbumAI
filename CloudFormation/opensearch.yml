@@ -1,0 +1,48 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: ""
+Resources:
+  OpenSearchServiceDomain:
+    Type: "AWS::OpenSearchService::Domain"
+    DeletionPolicy: Retain
+    Properties:
+      DomainName: "photo"
+      EngineVersion: "OpenSearch_1.2"
+      ClusterConfig: 
+        DedicatedMasterEnabled: false
+        InstanceCount: 2
+        InstanceType: "t3.medium.elasticsearch"
+        ZoneAwarenessEnabled: false
+        WarmEnabled: false
+      AccessPolicies:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: "Allow"
+          Principal:
+            AWS: "*"
+          Action: "es:*"
+          Resource: "arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/*"
+      SnapshotOptions: {}
+      EncryptionAtRestOptions: 
+        Enabled: true
+        KmsKeyId: !Sub "arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/6be78579-2992-4323-b5a9-7857aea850cc"
+      NodeToNodeEncryptionOptions: 
+        Enabled: true
+      AdvancedOptions: 
+        "indices.fielddata.cache.size": "20"
+        "indices.query.bool.max_clause_count": "1024"
+        override_main_response_version: "false"
+        "rest.action.multi.allow_explicit_index": "true"
+      EBSOptions: 
+        EBSEnabled: true
+        VolumeType: "gp2"
+        VolumeSize: 10
+      CognitoOptions: 
+        Enabled: false
+      DomainEndpointOptions: 
+        EnforceHTTPS: true
+        TLSSecurityPolicy: "Policy-Min-TLS-1-0-2019-07"
+        CustomEndpointEnabled: false
+      AdvancedSecurityOptions: 
+        Enabled: true
+        InternalUserDatabaseEnabled: false
+

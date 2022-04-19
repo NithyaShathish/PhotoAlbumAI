@@ -1,0 +1,13 @@
+version: 0.2
+
+phases:
+  build:
+    commands:
+      - echo "building.."
+
+artifacts:
+  files:
+    - './**/*'
+  base-directory: App
+  exclude-paths: App/Web-Page.png
+  name: FrontEnd

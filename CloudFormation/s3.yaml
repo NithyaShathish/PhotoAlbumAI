@@ -1,0 +1,39 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Metadata:
+  Generator: "former2"
+Description: ""
+Resources:
+  S3Bucket:
+    Type: "AWS::S3::Bucket"
+    DeletionPolicy: Retain
+    Properties:
+      BucketName: !Sub "photo-album-bucket-${AWS::AccountId}"
+      CorsConfiguration: 
+        CorsRules: 
+        - 
+          AllowedHeaders: 
+          - "Content-Type"
+          - "X-Amz-Date"
+          - "Authorization"
+          - "X-Api-Key"
+          - "X-Amz-Security-Token"
+          - "x-amz-meta-customLabels"
+          - "x-amz-meta-customlabels"
+          AllowedMethods: 
+          - "GET"
+          - "PUT"
+          AllowedOrigins: 
+          - "*"
+      NotificationConfiguration: 
+        LambdaConfigurations: 
+        - 
+          Event: "s3:ObjectCreated:Put"
+          Function: !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:index-photos"
+
+  S3Bucket2:
+    Type: "AWS::S3::Bucket"
+    DeletionPolicy: Retain
+    Properties:
+      BucketName: "photoalbum1"
+      WebsiteConfiguration: 
+        IndexDocument: "index.html"
